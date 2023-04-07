@@ -1,0 +1,64 @@
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: nfs-csi-node-pod
+  namespace: kube-system
+spec:
+#  updateStrategy:
+#    rollingUpdate:
+#      maxUnavailable: 1
+#    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: nfs-csi-node-pod
+  template:
+    metadata:
+      labels:
+        app: nfs-csi-node-pod
+    spec:
+      hostNetwork: true  # original nfs connection would be broken without hostNetwork setting
+      dnsPolicy: Default  # available values: Default, ClusterFirstWithHostNet, ClusterFirst
+      serviceAccountName: nfs-csi-node
+      nodeSelector:
+        kubernetes.io/os: linux
+      #        kubernetes.io/hostname: vm-12-7-centos # 调试阶段可以先指定某一个节点启动
+      tolerations:
+        - operator: "Exists"
+      containers:
+        - name: nfs-csi
+#          securityContext:
+#            privileged: true
+#            capabilities:
+#              add: ["SYS_ADMIN"]
+#            allowPrivilegeEscalation: true
+          image: nfs-csi:v1.0
+          imagePullPolicy: "IfNotPresent"
+          command: ["/nfs-csi"]
+          args:
+            - "--endpoint=$(CSI_ENDPOINT)"
+            - "--nodeid=$(NODE_ID)"
+#          env:
+#            - name: NODE_ID
+#              valueFrom:
+#                fieldRef:
+#                  fieldPath: spec.nodeName
+#            - name: CSI_ENDPOINT
+#              value: /csi/csi.sock
+#          volumeMounts:
+#            - name: socket-dir
+#              mountPath: /csi
+#          resources:
+#            limits:
+#              memory: 300Mi
+#            requests:
+#              cpu: 10m
+#              memory: 20Mi
+#      volumes:
+#        - name: socket-dir
+#          hostPath:
+#            path: /var/lib/kubelet/plugins/csi-nfsplugin
+#            type: DirectoryOrCreate
+#        - name: registration-dir
+#          hostPath:
+#            path: /var/lib/kubelet/plugins_registry
+#            type: Directory
