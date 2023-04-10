@@ -20,6 +20,7 @@ func ParseEndpoint(ep string) (string, string, error) {
 }
 
 func getLogLevel(method string) int32 {
+	return 8
 	if method == "/csi.v1.Identity/Probe" ||
 		method == "/csi.v1.Node/NodeGetCapabilities" ||
 		method == "/csi.v1.Node/NodeGetVolumeStats" {

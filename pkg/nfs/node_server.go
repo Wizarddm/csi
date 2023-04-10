@@ -8,7 +8,7 @@ import (
 )
 
 type NodeServer struct {
-	nfs *nfs
+	nfs *NFSDriver
 }
 
 func (ns *NodeServer) NodeStageVolume(ctx context.Context, request *csi.NodeStageVolumeRequest) (*csi.NodeStageVolumeResponse, error) {

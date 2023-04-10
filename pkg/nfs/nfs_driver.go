@@ -1,6 +1,8 @@
 package nfs
 
-import "github.com/container-storage-interface/spec/lib/go/csi"
+import (
+	"github.com/container-storage-interface/spec/lib/go/csi"
+)
 
 type NFSDriver  struct {
 	Name                          string
@@ -11,12 +13,14 @@ type NFSDriver  struct {
 	controllerServiceCapabilities []*csi.ControllerServiceCapability
 }
 
-func NewNFSDriver(name, version, nodeId, endpoint string) *NFSDriver {
+func NewNFSDriver(name, version, nodeId, endpoint, server, serverPath, workingMountDir string) *NFSDriver {
 	nfs := &NFSDriver {
 		Name: name,
 		Version: version,
 		NodeId: nodeId,
 		Endpoint: endpoint,
+		//nfsMountPath: filepath.Join(server, serverPath),
+		nfsMountPath: workingMountDir,
 	}
 
 	nfs.addControllerServiceCapabilities([]csi.ControllerServiceCapability_RPC_Type{

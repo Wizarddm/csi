@@ -44,6 +44,10 @@ func (s *nonBlockGRPCServer) serve(endpoint string, ids csi.IdentityServer, cs c
 
 	listener, err := net.Listen(proto, addr)
 
+	if err != nil {
+		klog.Fatalf("Failed to Listen, %s", err)
+	}
+
 	opts := []grpc.ServerOption{
 		grpc.UnaryInterceptor(logGRPC),
 	}
