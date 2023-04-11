@@ -12,7 +12,7 @@ func main() {
 	nodeId := flag.String("nodeid", "", "CSI nodeid")
 	server := flag.String("server", "","NFS server")
 	serverPath := flag.String("serverPath", "", "NFS server path")
-	workingMountDir := flag.String("working-mount-dir", "/tmp", "working directory for provisioner to mount nfs shares temporarily")
+	workingMountDir := flag.String("working-mount-dir", "/mount", "working directory for provisioner to mount nfs shares temporarily")
 
 	klog.Infof("Multi CSI Driver endPoints: %s, nodeId: %s", *endpoint, *nodeId)
 
@@ -20,6 +20,15 @@ func main() {
 	defer klog.Flush()
 	flag.Parse()
 
-	d := nfs.NewNFSDriver("nfscsi", "1.0", *nodeId, *endpoint, *server, *serverPath, *workingMountDir)
+	options := &nfs.DriverOptions{
+		Name: "nfscsi",
+		NodeId: *nodeId,
+		Endpoint: *endpoint,
+		Server: *server,
+		ServerPath: *serverPath,
+		WorkingMountDir: *workingMountDir,
+	}
+
+	d := nfs.NewNFSDriver(options)
 	d.Run()
 }

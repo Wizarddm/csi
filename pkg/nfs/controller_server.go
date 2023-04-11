@@ -32,8 +32,13 @@ func (c *ControllerServer) CreateVolume(ctx context.Context, request *csi.Create
 
 func (c *ControllerServer) DeleteVolume(ctx context.Context, request *csi.DeleteVolumeRequest) (*csi.DeleteVolumeResponse, error) {
 	klog.Infof("DeleteVolume request")
-	klog.Infof("volumeID: %s", request.GetVolumeId())
-	return nil, os.Remove(filepath.Join(c.nfs.nfsMountPath, request.GetVolumeId()))
+	klog.Infof("DeleteVolume volumeID: %s", request.GetVolumeId())
+
+	if err := os.Remove(filepath.Join(c.nfs.nfsMountPath, request.GetVolumeId())); err != nil {
+		klog.Fatalf("DeleteVolume Failed, DeleteVolume vo: %DeleteVolume: %s", request.GetVolumeId())
+		return nil, os.Remove(filepath.Join(c.nfs.nfsMountPath, request.GetVolumeId()))
+	}
+	return &csi.DeleteVolumeResponse{}, nil
 }
 
 func (c *ControllerServer) ControllerPublishVolume(ctx context.Context, request *csi.ControllerPublishVolumeRequest) (*csi.ControllerPublishVolumeResponse, error) {

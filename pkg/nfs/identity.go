@@ -12,8 +12,8 @@ type IdentityServer struct {
 
 func (id *IdentityServer) GetPluginInfo(ctx context.Context, request *csi.GetPluginInfoRequest) (*csi.GetPluginInfoResponse, error) {
 	return &csi.GetPluginInfoResponse{
-		Name: id.nfs.Name,
-		VendorVersion: id.nfs.Version,
+		Name: id.nfs.name,
+		VendorVersion: id.nfs.version,
 	}, nil
 }
 

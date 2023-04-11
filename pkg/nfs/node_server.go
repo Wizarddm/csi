@@ -4,11 +4,17 @@ import (
 	"fmt"
 	"github.com/container-storage-interface/spec/lib/go/csi"
 	"golang.org/x/net/context"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"k8s.io/klog/v2"
+	"os"
+	"path/filepath"
+	mount "k8s.io/mount-utils"
 )
 
 type NodeServer struct {
 	nfs *NFSDriver
+	mount mount.Interface
 }
 
 func (ns *NodeServer) NodeStageVolume(ctx context.Context, request *csi.NodeStageVolumeRequest) (*csi.NodeStageVolumeResponse, error) {
@@ -20,10 +26,54 @@ func (ns *NodeServer) NodeUnstageVolume(ctx context.Context, request *csi.NodeUn
 }
 
 func (ns *NodeServer) NodePublishVolume(ctx context.Context, request *csi.NodePublishVolumeRequest) (*csi.NodePublishVolumeResponse, error) {
-	return &csi.NodePublishVolumeResponse{}, fmt.Errorf("NodePublishVolume error")
+	klog.Infof("NodePublishVolume Request")
+	capacity := request.GetVolumeCapability()
+	if capacity == nil {
+		return nil, fmt.Errorf("capacity is nil")
+	}
+	options := capacity.GetMount().GetMountFlags()
+	if request.Readonly {
+		options = append(options, "ro")
+	}
+
+	targetPath := request.GetTargetPath()
+	if targetPath == "" {
+		return nil, fmt.Errorf("target path nil")
+	}
+
+	source := fmt.Sprintf("%s:%s", ns.nfs.nfsServer, filepath.Join(ns.nfs.nfsServerPath, request.GetVolumeId()))
+
+	notMnt, err := ns.mount.IsLikelyNotMountPoint(targetPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			if err := os.MkdirAll(targetPath, os.FileMode(0755)); err != nil {
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+			notMnt = true
+		}
+	} else {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if !notMnt {
+		return &csi.NodePublishVolumeResponse{}, nil
+	}
+
+	klog.Infof("source: %s, targetPath: %s, option: %v", source, targetPath, options)
+
+	if err := ns.mount.Mount(source, targetPath, "nfs", options); err != nil {
+		return nil, err
+	}
+
+	return &csi.NodePublishVolumeResponse{}, nil
 }
 
 func (ns *NodeServer) NodeUnpublishVolume(ctx context.Context, request *csi.NodeUnpublishVolumeRequest) (*csi.NodeUnpublishVolumeResponse, error) {
+	klog.Infof("NodeUnpublishVolume Request")
+	targetPath := request.GetTargetPath()
+
+	if err := mount.CleanupMountPoint(targetPath, ns.mount, true); err != nil {
+		return nil, err
+	}
 	return &csi.NodeUnpublishVolumeResponse{}, fmt.Errorf("NodeUnpublishVolume error")
 }
 
@@ -36,12 +86,15 @@ func (ns *NodeServer) NodeExpandVolume(ctx context.Context, request *csi.NodeExp
 }
 
 func (ns *NodeServer) NodeGetCapabilities(ctx context.Context, request *csi.NodeGetCapabilitiesRequest) (*csi.NodeGetCapabilitiesResponse, error) {
-	return &csi.NodeGetCapabilitiesResponse{}, fmt.Errorf("NodeGetCapabilities error")
+	klog.Infof("NodeGetCapabilities Request")
+	return &csi.NodeGetCapabilitiesResponse{
+		Capabilities: ns.nfs.nodeServiceCapabilities,
+	}, nil
 }
 
 func (ns *NodeServer) NodeGetInfo(ctx context.Context, request *csi.NodeGetInfoRequest) (*csi.NodeGetInfoResponse, error) {
 	klog.Infof("NodeGetInfo request")
 	return &csi.NodeGetInfoResponse{
-		NodeId: ns.nfs.NodeId,
+		NodeId: ns.nfs.nodeId,
 	}, nil
 }
