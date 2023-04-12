@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	mount "k8s.io/mount-utils"
+	"time"
 )
 
 type NodeServer struct {
@@ -69,12 +70,24 @@ func (ns *NodeServer) NodePublishVolume(ctx context.Context, request *csi.NodePu
 
 func (ns *NodeServer) NodeUnpublishVolume(ctx context.Context, request *csi.NodeUnpublishVolumeRequest) (*csi.NodeUnpublishVolumeResponse, error) {
 	klog.Infof("NodeUnpublishVolume Request")
+	volumeId := request.GetVolumeId()
 	targetPath := request.GetTargetPath()
+	klog.Infof("UnpublishVolume targetPath: %s, volumeId: %s", volumeId, targetPath)
 
-	if err := mount.CleanupMountPoint(targetPath, ns.mount, true); err != nil {
-		return nil, err
+	var err error
+	extennsiveMountPointCheck := true
+	forceUnmounter, ok := ns.mount.(mount.MounterForceUnmounter)
+	if ok {
+		klog.Infof("force unmout %s on %s", volumeId, targetPath)
+		err = mount.CleanupMountWithForce(targetPath, forceUnmounter, extennsiveMountPointCheck, 30*time.Second)
+	} else {
+		err = mount.CleanupMountPoint(targetPath, ns.mount, true)
 	}
-	return &csi.NodeUnpublishVolumeResponse{}, fmt.Errorf("NodeUnpublishVolume error")
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to unmount target %q: %v", targetPath, err)
+	}
+	return &csi.NodeUnpublishVolumeResponse{}, nil
 }
 
 func (ns *NodeServer) NodeGetVolumeStats(ctx context.Context, request *csi.NodeGetVolumeStatsRequest) (*csi.NodeGetVolumeStatsResponse, error) {

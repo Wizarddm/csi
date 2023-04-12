@@ -155,4 +155,4 @@ spec:
         - name: nfs-server
           nfs:
             server: 192.168.34.2 # 配置nfs server ip
-            path: /mnt/disk # 配置nfs server root path
+            path: "/mnt/disk" # 配置nfs server root path
