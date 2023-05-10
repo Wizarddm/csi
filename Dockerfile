@@ -1,5 +1,5 @@
 FROM busybox
 
-COPY build/nfs-csi /
+COPY build/toy-lustre-csi /
 
-ENTRYPOINT ["/nfs-csi"]
+ENTRYPOINT ["/toy-lustre-csi"]

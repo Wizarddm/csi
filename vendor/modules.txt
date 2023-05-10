@@ -18,12 +18,8 @@ github.com/golang/protobuf/ptypes/wrappers
 # github.com/kubernetes-csi/csi-lib-utils v0.13.0
 ## explicit; go 1.18
 github.com/kubernetes-csi/csi-lib-utils/protosanitizer
-# github.com/moby/sys/mountinfo v0.6.2
-## explicit; go 1.16
-github.com/moby/sys/mountinfo
 # golang.org/x/net v0.7.0
 ## explicit; go 1.17
-golang.org/x/net/context
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
@@ -127,7 +123,7 @@ google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/timestamppb
 google.golang.org/protobuf/types/known/wrapperspb
-# k8s.io/klog/v2 v2.90.1
+# k8s.io/klog/v2 v2.100.1
 ## explicit; go 1.13
 k8s.io/klog/v2
 k8s.io/klog/v2/internal/buffer
@@ -135,11 +131,3 @@ k8s.io/klog/v2/internal/clock
 k8s.io/klog/v2/internal/dbg
 k8s.io/klog/v2/internal/serialize
 k8s.io/klog/v2/internal/severity
-# k8s.io/mount-utils v0.26.3
-## explicit; go 1.19
-k8s.io/mount-utils
-# k8s.io/utils v0.0.0-20221107191617-1a15be271d1d
-## explicit; go 1.18
-k8s.io/utils/exec
-k8s.io/utils/io
-k8s.io/utils/keymutex
