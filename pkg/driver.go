@@ -1,6 +1,21 @@
 package pkg
 
-import "github.com/container-storage-interface/spec/lib/go/csi"
+import (
+	"flag"
+	"github.com/container-storage-interface/spec/lib/go/csi"
+)
+
+var DefaultUid string
+var DefaultGid string
+var MountPermissions uint64
+var WorkingMountDir string
+
+func init() {
+	flag.StringVar(&DefaultUid, "lustre-defaultuid", "nfsnobody", "lustre mount default uid")
+	flag.StringVar(&DefaultGid, "lustre-defaultgid", "nfsnobody", "lustre mount default gid")
+	flag.Uint64Var(&MountPermissions, "lustre-permissions", 0777, "lustre mount permissions")
+	flag.StringVar(&WorkingMountDir, "lustre-mountdir", "/mnt/lustre", "lustre working mount dir")
+}
 
 type Driver interface {
 	Run()
@@ -27,6 +42,11 @@ type LusterDriver struct {
 	Version string
 	NodeId string
 	endpoint string
+
+	DefaultUid       string
+	DefaultGid       string
+	MountPermissions uint64
+	WorkingMountDir  string
 
 	controllerServiceCapabilities []*csi.ControllerServiceCapability
 	nodeServiceCapabilities []*csi.NodeServiceCapability
