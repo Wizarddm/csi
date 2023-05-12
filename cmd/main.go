@@ -15,6 +15,8 @@ func main() {
 	opt := pkg.DriverOptions{
 		Endpoint: *endpoint,
 		NodeId: *nodeId,
+		Name: "lustrecsi",
+		Version: "1.0",
 	}
 
 	d := pkg.NewDriver(opt)

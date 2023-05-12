@@ -24,12 +24,16 @@ type Driver interface {
 type DriverOptions struct {
 	Endpoint string
 	NodeId string
+	Name string
+	Version string
 }
 
 func NewDriver(opt DriverOptions) Driver {
 	d := &LusterDriver{
 		endpoint: opt.Endpoint,
 		NodeId: opt.NodeId,
+		Name: opt.Name,
+		Version: opt.Version,
 	}
 	d.addControllerServiceCapabilities([]csi.ControllerServiceCapability_RPC_Type{
 		csi.ControllerServiceCapability_RPC_CREATE_DELETE_VOLUME,

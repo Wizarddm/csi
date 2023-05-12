@@ -1,14 +1,14 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: test-lustre
-provisioner: test-lustre
+  name: lustrecsi
+provisioner: lustrecsi
 
 ---
 apiVersion: storage.k8s.io/v1
 kind: CSIDriver
 metadata:
-  name: test-lustre
+  name: lustrecsi
 spec:
   attachRequired: false
 
@@ -108,7 +108,7 @@ spec:
             - "--leader-election-namespace=test-z"
           env:
             - name: ADDRESS
-              value: csi/csi.sock
+              value: /csi/csi.sock
           volumeMounts:
             - mountPath: /csi
               name: socket-dir
