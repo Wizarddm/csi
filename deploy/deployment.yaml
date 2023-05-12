@@ -3,6 +3,11 @@ kind: StorageClass
 metadata:
   name: lustrecsi
 provisioner: lustrecsi
+parameters:
+  server: 172.31.33.132@tcp
+  share: /hcufs
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
 
 ---
 apiVersion: storage.k8s.io/v1
